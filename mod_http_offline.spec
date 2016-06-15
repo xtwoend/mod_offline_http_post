@@ -1,0 +1,5 @@
+author: "Sami Pyy"
+category: "http"
+summary: "HTTP POST when user is offline"
+home: "https://github.com/spyy/mod_http_offline"
+url: "https://github.com/spyy/mod_http_offline.git"
