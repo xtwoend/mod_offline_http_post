@@ -1,6 +1,6 @@
 %% name of module must match file name
 -module(mod_http_offline).
--author("Sami Pyy").
+-author("dev@codepond.org").
 
 -behaviour(gen_mod).
 
