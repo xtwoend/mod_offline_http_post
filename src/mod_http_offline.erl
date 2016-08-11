@@ -41,5 +41,5 @@ post_offline_message(From, To, Body, SubType, MessageId) ->
 		"message_id=", binary_to_list(MessageId), Sep,
 		"access_token=123-secret-key"
 	],
-	%% httpc:request(post, {"[your-url-here]", [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
+	httpc:request(post, {"[your-url-here]", [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
 	?INFO_MSG("post request sent", []).
