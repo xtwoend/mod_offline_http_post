@@ -1,38 +1,52 @@
-mod_http_offline
-================
-
-Ejabberd module to send a post if users was offline.
+Ejabberd 16.08 module to send offline user's message via POST request to target URL.
+The main motivation for this module is to use it with push notifications. The request body is in JSON format. See the example below.
 
 
-This module is based on [Adam Duke mod_interact](https://github.com/adamvduke/mod_interact), [Jason Rowe's post](http://jasonrowe.com/2011/12/30/ejabberd-offline-messages/) and a lot of pieces of code and tips from the web to adapts to work with Ejabber 14.12.
+Installation
+------------
 
-Installing
-----------
+1.    Clone the repository into your Ejabberd's modules sources' folder. On Mac OS X, this folder is `~/.ejabberd-modules/sources/`.
+2.    Run command: `ejabberdctl module_install mod_offline_http_post`
 
-Clone this repository:
+That's it. The module is now installed.
 
-``` git clone git@github.com:raelmax/mod_http_offline.git```
+Configuration
+-------------
 
-Change the ```'[your-url-here]'``` string in ```mod_http_offline.erl``` file.
-
-To compile this I downloaded the code at my home directory and run:
-
-``` 
-	erlc -I /lib/ejabberd/include/ -pa ~/ejabberd/deps/lager/ebin/ mod_http_offline.erl
-```
-
-Move the .beam file to ejabberd ebin folder:
-
-``` 
-	sudo mv mod_http_offline.beam /lib/ejabberd/ebin/ 
-```
-
-Add "mod_http_offline" to your ejabberd.yml config at "modules" section:
+Add the following to ejabberd configuration under `modules:`
 
 ```
-    mod_http_offline: {}
+mod_offline_http_post:
+    auth_token: "secret"
+    post_url: "http://example.com/notify"
 ```
 
-Restart ejabberd! \o/
+-    auth_token - user defined, hard coded token that will be sent as part of the request's body. Use this token on the target server to validate that the request arrived from a trusted source.
+-    post_url - the server's endpoint url
 
-This is tested with ejabberd 14.12 and ubuntu server 14.04.
+Example of the outgoing request:
+--------------------------------
+
+```
+{'to':'user2','from':'user1','body':'hi there!','message_id':'purple9ca5e35b','access_token':'secret'}
+```
+
+Build and extend this module
+----------------------------
+
+The assumption is that you're developing on Mac OS X and installed Ejabberd via homebrew.
+To build this module for development use the script `build.sh`. Please note that this script is configured to Ejabberd installation on Mac OS X. For other OS, you'll have to modify the dependencies path to point to your Ejabberd installation.
+
+build.sh
+```
+/usr/local/Cellar/ejabberd/16.08/lib/lager-3.2.1/ebin/ 
+/usr/local/Cellar/ejabberd/16.08/lib/fast_xml-1.1.14/ebin/
+```
+
+ You will also need to modify the path of Ejabberd `include` folder in `Emakefile`.
+
+```
+{'src/mod_offline_http_post', [{outdir, "ebin"},{i,"/usr/local/Cellar/ejabberd/16.08/lib/ejabberd-16.08/include"}]}.
+```
+
+Note that the scripts are pointing to Ejabberd version 16.08. If you're building against newer versions, you'll need to modify the paths in both `build.sh` and `Emakefile` regardless of whether you're on Mac OS X or not.
