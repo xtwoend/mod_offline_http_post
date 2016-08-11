@@ -14,34 +14,32 @@ start(_Host, _Opt) ->
 	?INFO_MSG("mod_offline_http_post loading", []),
 	inets:start(),
 	?INFO_MSG("HTTP client started", []),
-	ejabberd_hooks:add(offline_message_hook, _Host, ?MODULE, create_message, 50).
+	ejabberd_hooks:add(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
 stop (_Host) ->
 	?INFO_MSG("stopping mod_offline_http_post", []),
-	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 50).
+	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
 create_message(_From, _To, Packet) ->
-	MessageId = xml:get_tag_attr_s(list_to_binary("id"), Packet),
-	Type = xml:get_tag_attr_s(list_to_binary("type"), Packet),
-	FromS = _From#jid.luser,
-	ToS = _To#jid.luser,
-	Body = xml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
+	Type = fxml:get_tag_attr_s(list_to_binary("type"), Packet),
+	Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
+	MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
 
 	if (Type == <<"chat">>) and (Body /= <<"">>) ->
-		post_offline_message(FromS, ToS, Body, "SubType", MessageId)
+		post_offline_message(_From, _To, Body, "SubType", MessageId)
 	end.
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
 	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
 	Sep = "&",
-	Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, [] ),
-    PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, [] ),
+    Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+    PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
 	Post = [
-		"from=", From, Sep,
-		"to=", To, Sep,
+		"to=", To#jid.luser, Sep,
+        "from=", From#jid.luser, Sep,
 		"body=", binary_to_list(Body), Sep,
 		"message_id=", binary_to_list(MessageId), Sep,
 		"access_token=", Token
 	],
-	httpc:request(post, {PostUrl, [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
+	httpc:request(post, {binary_to_list(PostUrl), [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
 	?INFO_MSG("post request sent", []).
