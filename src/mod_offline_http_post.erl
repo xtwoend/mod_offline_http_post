@@ -1,5 +1,5 @@
 %% name of module must match file name
--module(mod_http_offline).
+-module(mod_offline_http_post).
 -author("dev@codepond.org").
 
 -behaviour(gen_mod).
@@ -11,13 +11,13 @@
 -include("logger.hrl").
 
 start(_Host, _Opt) ->
-	?INFO_MSG("mod_http_offline loading", []),
+	?INFO_MSG("mod_offline_http_post loading", []),
 	inets:start(),
 	?INFO_MSG("HTTP client started", []),
 	ejabberd_hooks:add(offline_message_hook, _Host, ?MODULE, create_message, 50).
 
 stop (_Host) ->
-	?INFO_MSG("stopping mod_http_offline", []),
+	?INFO_MSG("stopping mod_offline_http_post", []),
 	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 50).
 
 create_message(_From, _To, Packet) ->
@@ -34,12 +34,14 @@ create_message(_From, _To, Packet) ->
 post_offline_message(From, To, Body, SubType, MessageId) ->
 	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
 	Sep = "&",
+	Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, [] ),
+    PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, [] ),
 	Post = [
 		"from=", From, Sep,
 		"to=", To, Sep,
 		"body=", binary_to_list(Body), Sep,
 		"message_id=", binary_to_list(MessageId), Sep,
-		"access_token=123-secret-key"
+		"access_token=", Token
 	],
-	httpc:request(post, {"[your-url-here]", [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
+	httpc:request(post, {PostUrl, [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
 	?INFO_MSG("post request sent", []).
