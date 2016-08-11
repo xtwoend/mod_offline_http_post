@@ -31,15 +31,15 @@ create_message(_From, _To, Packet) ->
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
 	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
-	Sep = "&",
+	Sep = "',",
     Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
     PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
 	Post = [
-		"to=", To#jid.luser, Sep,
-        "from=", From#jid.luser, Sep,
-		"body=", binary_to_list(Body), Sep,
-		"message_id=", binary_to_list(MessageId), Sep,
-		"access_token=", Token
+		"{'to':'", To#jid.luser, Sep,
+        "'from':'", From#jid.luser, Sep,
+		"'body':'", binary_to_list(Body), Sep,
+		"'message_id':'", binary_to_list(MessageId), Sep,
+		"'access_token':'", Token, "'}"
 	],
-	httpc:request(post, {binary_to_list(PostUrl), [], "application/x-www-form-urlencoded", list_to_binary(Post)},[],[]),
+	httpc:request(post, {binary_to_list(PostUrl), [], "application/json", list_to_binary(Post)},[],[]),
 	?INFO_MSG("post request sent", []).
