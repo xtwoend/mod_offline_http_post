@@ -7,7 +7,6 @@
 -export([start/2, stop/1, create_message/3]).
 
 -include("ejabberd.hrl").
-%%-include("jlib.hrl").
 -include("xmpp.hrl").
 -include("logger.hrl").
 
@@ -21,15 +20,6 @@ stop (_Host) ->
 	?INFO_MSG("stopping mod_offline_http_post", []),
 	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
-%%create_message(_From, _To, Packet) ->
-%%	Type = fxml:get_tag_attr_s(list_to_binary("type"), Packet),
-%%	Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
-%%	MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
-%%
-%%	if (Type == <<"chat">>) and (Body /= <<"">>) ->
-%%		post_offline_message(_From, _To, Body, "SubType", MessageId)
-%%	end.
-
 create_message(_From, _To, Packet)
 	when (Packet#message.type == chat) and (Packet#message.body /= []) ->
 	[{text, _, Body}] = Packet#message.body,
@@ -39,17 +29,13 @@ create_message(_From, _To, _Packet) ->
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
 	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
-	Sep = "',",
-    Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
-    PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
-	  Test = "test",
-	Post = [
-		"{'to':'", To#jid.luser, Sep,
-        "'from':'", From#jid.luser, Sep,
-		"'body':'", binary_to_list(Body), Sep,
-		"'message_id':'", binary_to_list(MessageId), Sep,
-		"'access_token':'", Token, "'}"
-	],
-	Request = {binary_to_list(PostUrl), [{"Authorization","key=blabla"}], "application/json", Test},
-	httpc:request(post, Request,[],[]),
-	?INFO_MSG("post request sent", []).
+	Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+	PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+	ToUser = To#jid.luser,
+	FromUser = From#jid.luser,
+	Vhost = To#jid.lserver,
+	Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_t$
+	Request = {binary_to_list(PostUrl), [{"Authorization","key=Token"}], "application/x-www-form-urlencoded", Data},
+httpc:request(post, Request,[],[]),
+?INFO_MSG("post request sent", []).
+
