@@ -28,14 +28,14 @@ create_message(_From, _To, _Packet) ->
 	ok.
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
-	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
-	Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
-	PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
-	ToUser = To#jid.luser,
-	FromUser = From#jid.luser,
-	Vhost = To#jid.lserver,
-	Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_t$
-	Request = {binary_to_list(PostUrl), [{"Authorization","key=Token"}], "application/x-www-form-urlencoded", Data},
+  ?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
+  Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+  PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+  ToUser = To#jid.luser,
+  FromUser = From#jid.luser,
+  Vhost = To#jid.lserver,
+  Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_t$
+  Request = {binary_to_list(PostUrl), [{"Authorization", binary_to_list(Token)}], "application/x-www-form-urlencoded", Data},
 httpc:request(post, Request,[],[]),
 ?INFO_MSG("post request sent", []).
 
