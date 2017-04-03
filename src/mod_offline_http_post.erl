@@ -4,7 +4,7 @@
 
 -behaviour(gen_mod).
 
--export([start/2, stop/1, create_message/3, mod_opt_type/1, depends/2]).
+-export([start/2, stop/1, create_message/3]).
 
 -include("ejabberd.hrl").
 %%-include("jlib.hrl").
