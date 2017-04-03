@@ -42,10 +42,11 @@ post_offline_message(From, To, Body, SubType, MessageId) ->
 	Sep = "',",
     Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
     PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+	  Test = "test",
 	Post = [
 		"{'to':'", To#jid.luser, Sep,
         "'from':'", From#jid.luser, Sep,
-		"'body':'", binary_to_list(Body), Sep,
+		"'body':'", Test, Sep,
 		"'message_id':'", binary_to_list(MessageId), Sep,
 		"'access_token':'", Token, "'}"
 	],
