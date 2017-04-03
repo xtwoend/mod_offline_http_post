@@ -50,5 +50,6 @@ post_offline_message(From, To, Body, SubType, MessageId) ->
 		"'message_id':'", binary_to_list(MessageId), Sep,
 		"'access_token':'", Token, "'}"
 	],
-	httpc:request(post, {binary_to_list(PostUrl), [], "application/json", "Hallo"},[],[]),
+	Request = {binary_to_list(PostUrl), [{"Authorization","key=blabla"}], "application/json", Test},
+	httpc:request(post, Request,[],[]),
 	?INFO_MSG("post request sent", []).
