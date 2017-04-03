@@ -46,9 +46,9 @@ post_offline_message(From, To, Body, SubType, MessageId) ->
 	Post = [
 		"{'to':'", To#jid.luser, Sep,
         "'from':'", From#jid.luser, Sep,
-		"'body':'", Test, Sep,
+		"'body':'", binary_to_list(Body), Sep,
 		"'message_id':'", binary_to_list(MessageId), Sep,
 		"'access_token':'", Token, "'}"
 	],
-	httpc:request(post, {binary_to_list(PostUrl), [], "application/json", list_to_binary(Post)},[],[]),
+	httpc:request(post, {binary_to_list(PostUrl), [], "application/json", "Hallo"},[],[]),
 	?INFO_MSG("post request sent", []).
