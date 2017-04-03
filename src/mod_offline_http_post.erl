@@ -7,7 +7,8 @@
 -export([start/2, stop/1, create_message/3]).
 
 -include("ejabberd.hrl").
--include("jlib.hrl").
+%%-include("jlib.hrl").
+-include("xmpp.hrl").
 -include("logger.hrl").
 
 start(_Host, _Opt) ->
@@ -20,14 +21,21 @@ stop (_Host) ->
 	?INFO_MSG("stopping mod_offline_http_post", []),
 	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
-create_message(_From, _To, Packet) ->
-	Type = fxml:get_tag_attr_s(list_to_binary("type"), Packet),
-	Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
-	MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
+%%create_message(_From, _To, Packet) ->
+%%	Type = fxml:get_tag_attr_s(list_to_binary("type"), Packet),
+%%	Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
+%%	MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
+%%
+%%	if (Type == <<"chat">>) and (Body /= <<"">>) ->
+%%		post_offline_message(_From, _To, Body, "SubType", MessageId)
+%%	end.
 
-	if (Type == <<"chat">>) and (Body /= <<"">>) ->
-		post_offline_message(_From, _To, Body, "SubType", MessageId)
-	end.
+create_message(_From, _To, Packet)
+	when (Packet#message.type == chat) and (Packet#message.body /= []) ->
+	[{text, _, Body}] = Packet#message.body,
+	post_offline_message(_From, _To, Body, "SubType", Packet#message.id);
+create_message(_From, _To, _Packet) ->
+	ok.
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
 	?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
