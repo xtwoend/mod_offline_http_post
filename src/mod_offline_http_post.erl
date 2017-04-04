@@ -34,7 +34,7 @@ post_offline_message(From, To, Body, SubType, MessageId) ->
   ToUser = To#jid.luser,
   FromUser = From#jid.luser,
   Vhost = To#jid.lserver,
-  Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_t$
+  Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_to_list(MessageId)], ""),
   Request = {binary_to_list(PostUrl), [{"Authorization", binary_to_list(Token)}], "application/x-www-form-urlencoded", Data},
 httpc:request(post, Request,[],[]),
 ?INFO_MSG("post request sent", []).
