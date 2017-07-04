@@ -23,17 +23,17 @@ stop (_Host) ->
 
 create_message({Action, Packet} = Acc) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
 	[{text, _, Body}] = Packet#message.body,
-	post_offline_message(Packet#message.from, Packet#message.to, Body, "SubType", Packet#message.id),
+	post_offline_message(Packet#message.from, Packet#message.to, Body, Packet#message.id),
 	Acc.
 
 create_message(_From, _To, Packet) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
   Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
   MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
-  post_offline_message(_From, _To, Body, "SubType", MessageId),
+  post_offline_message(_From, _To, Body, MessageId),
   ok.
 
-post_offline_message(From, To, Body, SubType, MessageId) ->
-  ?INFO_MSG("Posting From ~p To ~p Body ~p SubType ~p ID ~p~n",[From, To, Body, SubType, MessageId]),
+post_offline_message(From, To, Body, MessageId) ->
+  ?INFO_MSG("Posting From ~p To ~p Body ~p ID ~p~n",[From, To, Body, MessageId]),
   Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
   PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
   ToUser = To#jid.luser,
