@@ -1,6 +1,6 @@
 %% name of module must match file name
+%% Update: info@ph-f.nl
 -module(mod_offline_http_post).
--author("dev@codepond.org").
 
 -behaviour(gen_mod).
 
@@ -20,11 +20,16 @@ stop (_Host) ->
 	?INFO_MSG("stopping mod_offline_http_post", []),
 	ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
+create_message({Action, Packet} = Acc) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
+	[{text, _, Body}] = Packet#message.body,
+	post_offline_message(Packet#message.from, Packet#message.to, Body, "SubType", Packet#message.id),
+	Acc.
+
 create_message(_From, _To, Packet)
 	when (Packet#message.type == chat) and (Packet#message.body /= []) ->
-	[{text, _, Body}] = Packet#message.body,
-	post_offline_message(_From, _To, Body, "SubType", Packet#message.id);
-create_message(_From, _To, _Packet) ->
+	Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
+	MessageId = fxml:get_tag_attr_s(list_to_binary("id"), Packet),
+	post_offline_message(_From, _To, Body, "SubType", MessageId),
 	ok.
 
 post_offline_message(From, To, Body, SubType, MessageId) ->
