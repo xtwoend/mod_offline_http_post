@@ -1,15 +1,18 @@
-Ejabberd 17.01 module to send offline user's message via POST request to target URL.
-The main motivation for this module is to use it with push notifications. 
+Ejabberd 17.04 module to send offline user's message via POST request to target URL.
+This module can call an api to send e.g. a push message. 
 The request body is in application/x-www-form-urlencoded format. See the example below.
 
+V17.01
 Forked from Nimrodda/mod_offline_http_post ejabberd 16.08
+
+V17.04 updated and tested in 17.04, I assume it works in 17.03 also.
 
 Installation
 ------------
 
-1. cd /var/lib/ejabberd/.ejabberd-modules/sources/
+1. cd /opt/ejabberd-17.04/.ejabberd-module/sources/
 2. git clone https://github.com/PH-F/mod_offline_http_post.git;
-3. bash /var/ejabberd-17.01/bin/ejabberdctl module-install mod_offline_http_post
+3. bash /opt/ejabberd-17.04/.ejabberd-module/bin/ejabberdctl module-install mod_offline_http_post
 4. /etc/init.d/ejabberd restart;
 
 That's it. The module is now installed.
