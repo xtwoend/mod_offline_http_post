@@ -24,7 +24,10 @@ stop (_Host) ->
 create_message({Action, Packet} = Acc) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
 	[{text, _, Body}] = Packet#message.body,
 	post_offline_message(Packet#message.from, Packet#message.to, Body, Packet#message.id),
-	Acc.
+  Acc;
+
+create_message(Acc) ->
+  Acc.
 
 create_message(_From, _To, Packet) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
   Body = fxml:get_path_s(Packet, [{elem, list_to_binary("body")}, cdata]),
