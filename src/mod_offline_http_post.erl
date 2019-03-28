@@ -41,7 +41,7 @@ post_offline_message(From, To, Body, MessageId) ->
   ToUser = To#jid.luser,
   FromUser = From#jid.luser,
   Vhost = To#jid.lserver,
-  case gen_mod:get_module_opt(To#jid.lserver, ?MODULE, confidential) of
+  case gen_mod:get_module_opt(To#jid.lserver, ?MODULE, confidential, false) of
     true -> Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&messageId=", binary_to_list(MessageId)], "");
     false -> Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_to_list(MessageId)], "")
   end,
