@@ -1,5 +1,5 @@
 author: "Patrick Houtman - PH-F"
 category: "http"
 summary: "HTTP POST user's messages to target URL when user is offline for eJabberd 17.01"
-home: "https://github.com/PH-F/mod_offline_http_post"
-url: "https://github.com/PH-F/mod_offline_http_post"
+home: "https://github.com/ahmadRMusa/mod_offline_http_post"
+url: "https://github.com/ahmadRMusa/mod_offline_http_post"
