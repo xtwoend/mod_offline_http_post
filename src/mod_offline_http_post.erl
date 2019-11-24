@@ -1,15 +1,19 @@
-%% name of module must match file name
-%% Update: info@ph-f.nl
+%% mod_offline_http_post.erl
+%% Update: ibrahimkoujar91@gmail.com
 -module(mod_offline_http_post).
--author("dev@codepond.org").
+-author("IbrahimKoujar").
 
+%% Every ejabberd module implements the gen_mod behavior
+%% The gen_mod behavior requires two functions: start/2 and stop/1
 -behaviour(gen_mod).
 
 -export([start/2, stop/1, create_message/1, create_message/3]).
+-export([mod_opt_type/1, mod_options/1, depends/2]).
 
+%% Required by ?INFO_MSG macros
+-include("logger.hrl").
 -include("scram.hrl").
 -include("xmpp.hrl").
--include("logger.hrl").
 
 start(_Host, _Opt) ->
   ?INFO_MSG("mod_offline_http_post loading", []),
@@ -36,16 +40,41 @@ create_message(_From, _To, Packet) when (Packet#message.type == chat) and (Packe
   ok.
 
 post_offline_message(From, To, Body, MessageId) ->
+
   ?INFO_MSG("Posting From ~p To ~p Body ~p ID ~p~n",[From, To, Body, MessageId]),
-  Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, auth_token, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
-  PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url, fun(S) -> iolist_to_binary(S) end, list_to_binary("")),
+  
+  Token = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, token),
+  PostUrl = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, post_url),
+  Confidential = gen_mod:get_module_opt(To#jid.lserver, ?MODULE, confidential),
+
   ToUser = To#jid.luser,
   FromUser = From#jid.luser,
   Vhost = To#jid.lserver,
-  case gen_mod:get_module_opt(To#jid.lserver, ?MODULE, confidential, false) of
+
+  case Confidential of
     true -> Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&messageId=", binary_to_list(MessageId)], "");
     false -> Data = string:join(["to=", binary_to_list(ToUser), "&from=", binary_to_list(FromUser), "&vhost=", binary_to_list(Vhost), "&body=", binary_to_list(Body), "&messageId=", binary_to_list(MessageId)], "")
   end,
-  Request = {binary_to_list(PostUrl), [{"Authorization", binary_to_list(Token)}], "application/x-www-form-urlencoded", Data},
+
+  Request = {PostUrl, [{"Authorization", Token}], "application/x-www-form-urlencoded", Data},
   httpc:request(post, Request,[],[]),
+
   ?INFO_MSG("post request sent", []).
+
+depends(_Host, _Opts) ->
+  [].
+
+mod_opt_type(token) ->
+  econf:string();
+mod_opt_type(post_url) ->
+  econf:string();  
+mod_opt_type(confidential) ->
+  econf:bool().
+
+mod_options(_Host) ->
+  [
+    {token, "secret"},
+    {post_url, "http://localhost/api"},
+    {confidential, false}
+  ].
+
