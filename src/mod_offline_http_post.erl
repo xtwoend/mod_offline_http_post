@@ -25,7 +25,8 @@ stop (_Host) ->
   ?INFO_MSG("stopping mod_offline_http_post", []),
   ejabberd_hooks:delete(offline_message_hook, _Host, ?MODULE, create_message, 1).
 
-create_message({Packet} = Acc) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
+create_message({Action, Packet} = Acc) when (Packet#message.type == chat) and (Packet#message.body /= []) ->
+  _ = Action,
 	[{text, _, Body}] = Packet#message.body,
 	post_offline_message(Packet#message.from, Packet#message.to, Body, Packet#message.id),
   Acc;
